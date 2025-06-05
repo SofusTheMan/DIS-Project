@@ -15,7 +15,7 @@ The GPA was scraped and cleaned from the [kurser.ku.dk](https://kurser.ku.dk), u
 Setup using `init.sh` script is shown below:
 ```bash
 # make sure to clone the repository from
-https://github.com/Balyeat/DIS-Project.git
+https://github.com/SofusTheMan/DIS-Project.git
 # change directory 
 cd DIS-Project
 # run the init.sh
@@ -27,7 +27,7 @@ python3 main.py
 Alternatively, you can follow these steps to setup manually:
 ```bash
 # first clone from repository from
-git clone https://github.com/Balyeat/DIS-Project.git
+git clone https://github.com/SofusTheMan/DIS-Project.git
 # change directory
 cd DIS-project
 # if on MacOS run pip3 instead
