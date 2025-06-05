@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>{{ user.username }}'s profile</h1>
+        <div style="display: flex; justify-content: space-around; margin-bottom: 2em;">
+            <div style="text-align: center;">
+                <div>High Score</div>
+                <div style="font-weight: bold;">
+                    {{ stats.high_score if stats and stats.high_score is not none else 0 }}
+                </div>
+            </div>
+            <div style="text-align: center;">
+                <div>Seen</div>
+                <div style="font-weight: bold;">
+                    {{ stats.seen if stats and stats.seen is not none else 0 }}/958 
+                    ({{ "%.2f"|format((stats.seen / 9.58) if stats and stats.seen is not none else 0.00) }}%)
+                </div>
+            </div>
+            <div style="text-align: center;">
+                <div>Average Score</div>
+                <div style="font-weight: bold;">
+                    {{ "%.2f"|format(stats.average_score) if stats and stats.average_score is not none else "0.00" }}
+                </div>
+            </div>
+            <div style="text-align: center;">
+                <div>Total Games Played</div>
+                <div style="font-weight: bold;">
+                    {{ stats.total_games if stats and stats.total_games is not none else 0 }}
+                </div>
+            </div>
+        </div>
+    <h2>Games Played</h2>
+    <table>
+                <thead>
+            <tr>
+                    <th>Time</th>
+                    <th>Score</th>
+            </tr>
+                </thead>
+                <tbody>
+            {% for game in games %}
+            <tr>
+                    <td data-sort="{{ game.time.full_time }}">{{ game.time.short_time }}</td>
+                    <td>{{ game['score'] }}</td>
+            </tr>
+            {% endfor %}
+            </tbody>
+
+    </table>
+{% endblock %}

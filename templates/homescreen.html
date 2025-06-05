@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <style>
+        body {
+            text-align: center;
+            margin-top: 100px;
+        }
+        form {
+            display: inline-block;
+            margin: 10px;
+        }
+    </style>
+
+    <h1>Welcome to the Course Game!</h1>
+    <p>Click below to start playing.</p>
+    <form action="/start_game">
+        <button class="btn-green" type="submit">Start Game</button>
+    </form>
+
+    <form action="/profile">
+        <button class="btn-green" type="submit">Profile</button>
+    </form>
+
+    <form action="/leaderboard">
+        <button class="btn-green" type="submit">Leaderboard</button>
+    </form>
+
+    <form action="/logout">
+        <button class="btn-red" type="submit">Logout</button>
+    </form>
+</body>
+{% endblock %}

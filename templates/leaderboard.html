@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+{% block content %}
+    <div class="header">
+        <h1>Leaderboard</h1>
+    </div>
+    
+    <div class="container"></div>
+
+
+    <button onclick="window.location.href='/'" class="back-button">Back to Home</button>
+        <div>
+            <button id="showUserLeaderboard" onclick="showLeaderboard('user')">User Leaderboard</button>
+            <button id="showGameLeaderboard" onclick="showLeaderboard('game')">Game Leaderboard</button>
+        </div>
+
+        <div id="userLeaderboardSection" style="display: block;">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Rank</th>
+                        <th>Username</th>
+                        <th>Average Score</th>
+                        <th>High Score</th>
+                        <th>Total Games</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if user_leaderboard and user_leaderboard|length > 0 %}
+                        {% for entry in user_leaderboard %}
+                            {% if loop.first %}
+                            <tr>
+                                <td class="rank1">{{ loop.index }}</td>
+                                <td class="rank1"><a href="/profile/{{ entry[0] }}">{{ entry[0] }}</a></td>
+                                <td class="rank1">{{ "%.2f"|format(entry[1]) }}</td>
+                                <td class="rank1">{{ entry[2] }}</td>
+                                <td class="rank1">{{ entry[3] }}</td>
+                            </tr>
+                            {% elif loop.index == 2 %}
+                            <tr>
+                                <td class="rank2">{{ loop.index }}</td>
+                                <td class="rank2"><a href="/profile/{{ entry[0] }}">{{ entry[0] }}</a></td>
+                                <td class="rank2">{{ "%.2f"|format(entry[1]) }}</td>
+                                <td class="rank2">{{ entry[2] }}</td>
+                                <td class="rank2">{{ entry[3] }}</td>
+                            </tr>
+                            {% elif loop.index == 3 %}
+                            <tr>
+                                <td class="rank3">{{ loop.index }}</td>
+                                <td class="rank3"><a href="/profile/{{ entry[0] }}">{{ entry[0] }}</a></td>
+                                <td class="rank3">{{ "%.2f"|format(entry[1]) }}</td>
+                                <td class="rank3">{{ entry[2] }}</td>
+                                <td class="rank3">{{ entry[3] }}</td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td>{{ loop.index }}</td>
+                                <td><a href="/profile/{{ entry[0] }}">{{ entry[0] }}</a></td>
+                                <td>{{ "%.2f"|format(entry[1]) }}</td>
+                                <td>{{ entry[2] }}</td>
+                                <td>{{ entry[3] }}</td>
+                            </tr>
+                            {% endif %}
+                        {% endfor %}
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+
+        <div id="gameLeaderboardSection" style="display: none;">
+            {% if leaderboard and leaderboard|length > 0 %}
+            <table>
+               <tr>
+                    <th>Rank</th>
+                    <th>Username</th>
+                    <th>Score</th>
+                    <th>Time</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for entry in leaderboard %}
+                <tr>
+                    <td>{{ loop.index }}</td>
+                    <td><a href="/profile/{{ entry.username }}">{{ entry.username }}</a></td>
+                    <td>{{ entry.score }}</td>
+                    <td data-sort="{{ entry.time.full_time }}">{{ entry.time.short_time }}</td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <p>No game entries yet.</p>
+            {% endif %}
+        </div>
+
+        <script>
+        function showLeaderboard(type) {
+            document.getElementById('userLeaderboardSection').style.display = (type === 'user') ? 'block' : 'none';
+            document.getElementById('gameLeaderboardSection').style.display = (type === 'game') ? 'block' : 'none';
+            document.getElementById('showUserLeaderboard').disabled = (type === 'user');
+            document.getElementById('showGameLeaderboard').disabled = (type === 'game');
+        }
+        </script>
+    </div>
+{% endblock %}

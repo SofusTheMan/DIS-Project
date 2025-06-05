@@ -1,0 +1,201 @@
+{% extends "base.html" %}
+{% block content %}
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 50px;
+            background-color: #f5f5f5;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .header h1 {
+            margin: 0;
+        }
+        .score {
+            font-size: 20px;
+            font-weight: bold;
+        }
+        .main {
+            text-align: center;
+            margin-top: 50px;
+        }
+        .container {
+            display: flex;
+            justify-content: center;
+            gap: 100px;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+        .course-card {
+            width: 300px;
+            padding: 20px;
+            background-color: #ffffff;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .course-card * {
+            margin: 15px 0;
+        }
+        .course-card .title {
+            font-size: 24px;
+            font-weight: 500;
+            color: #333;
+        }
+        .course-card .gpa {
+            font-size: 48px;
+            color: #2c3e50;
+            padding-left: 0px;
+            font-weight: bold;
+        }
+    
+    </style>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+
+    <script>
+        const course1Element = {
+            title: document.querySelectorAll('.course-card')[0].querySelector('.title'),
+            gpa: document.querySelectorAll('.course-card')[0].querySelector('.gpa')
+        };
+
+        const course2Element = {
+            title: document.querySelectorAll('.course-card')[1].querySelector('.title'),
+            gpa: document.querySelectorAll('.course-card')[1].querySelector('.gpa')
+        };
+
+        function revealResult(course1, score) {
+            const course2Element = document.querySelectorAll('.course-card')[1].querySelector('h1');
+            const targetGPA = course1[2];
+            let obj = { gpa: 0 };
+
+            gsap.fromTo(course2Element, { opacity: 0 }, { opacity: 1, duration: 0.3 });
+
+            gsap.to(obj, {
+                gpa: targetGPA,
+                duration: 0.5,
+                ease: "power1.out",
+                onUpdate: function() {
+                    course2Element.textContent = obj.gpa.toFixed(1);
+                },
+                onComplete: function() {
+                    course2Element.textContent = targetGPA.toFixed(1);
+                }
+            });
+        }
+
+        function showLostScreen(score) {
+            document.getElementById('lost-screen').style.display = 'block';
+            document.getElementById('in-game').style.display = 'none';
+
+            const finalScore = document.getElementById('final-score');
+            finalScore.textContent = 'Your score: ' + score;
+        }
+
+        function fetchGuess(guess) {
+            fetch('/guess', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: 'guess=' + encodeURIComponent(guess)
+            })
+            .then(res => res.json())
+            .then(data => {
+            const cards = document.querySelectorAll('.course-card');
+            const card1 = cards[0], card2 = cards[1];
+            const scoreEl = document.querySelector('.score');
+
+            if (data.game_over) {
+                revealResult(data.course2);
+                setTimeout(() => showLostScreen(data.score), 500);
+                return;
+            }
+
+            revealResult(data.course1);
+
+            setTimeout(() => {
+                const tl = gsap.timeline({
+                onComplete() {
+                    card1.querySelector('.title').textContent = data.course1[1];
+                    card1.querySelector('.gpa').textContent = data.course1[2].toFixed(1);
+
+                    card2.querySelector('.title').textContent = data.course2[1];
+                    card2.querySelector('.gpa').innerHTML = '?';
+
+                    scoreEl.textContent = 'Score: ' + data.score;
+
+                    gsap.set(card1, { x: 0, opacity: 1 });
+                    gsap.set(card2, { x: 400, opacity: 0 });
+
+                    gsap.to(card2, { x: 0, opacity: 1, duration: 0.4, ease: 'power1.inOut' });
+                }
+                });
+
+                tl.to(card1, { x: -400, opacity: 0, duration: 0.4, ease: 'power1.inOut' }, 0)
+                .to(card2, { x: -400, duration: 0.4, ease: 'power1.inOut' }, 0);
+            }, 500);
+
+            })
+            .catch(console.error);
+        }
+    </script>
+    <div class="header">
+        <h1>Higher or Lower?</h1>
+        <div class="score">Score: {{ score }}</div>
+    </div>
+
+    <div class="main">
+        <div class="container">
+            <div class="course-card">
+                <h3 class="title">{{ course1[1] }}</h3>
+                <h1 class="gpa">{{ course1[2] }}</h1>
+            </div>
+            
+            <div class="course-card">
+                <h3 class="title">{{ course2[1] }}</h3>
+                <h1 class="gpa">?</h1>
+            </div>
+        </div>
+        <div id="lost-screen" style="display: none;">
+            <h2 style="color: #e74c3c;;">You lost!</h2>
+            <h3 id="final-score">Your score: </h3>
+
+            <br>
+            <br>
+            <form action="/start_game" method="get" style="display: inline; margin-right: 20px;">
+                <button class="btn-green">Try Again</button>
+            </form>
+            <form action="/homescreen" method="get" style="display: inline;">
+                <button class="btn-red">Back to Home</button>
+            </form>
+        </div>
+        
+        <div id="in-game" style="display: block;">
+            <p>Is the GPA of the course on the right higher or lower than the one on the left?</p>
+            <br>
+            <div class="buttons">
+            <button type="button" class="btn-green" onclick="fetchGuess('higher')">
+            Higher <span style="font-size: 20px; vertical-align: middle;">&#8593;</span>
+            </button>
+            <button type="button" class="btn-green" onclick="fetchGuess('lower')">
+            Lower <span style="font-size: 20px; vertical-align: middle;">&#8595;</span>
+            </button>
+        </div>
+
+        <div style="margin-top: 30px;">
+            <form action="/homescreen" method="get">
+                <button class="btn-red">Back to Home</button>
+            </form>
+        </div>
+        </div>
+    </div>
+</body>
+{% endblock %}

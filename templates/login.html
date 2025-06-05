@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% block content %}
+    <h1>Login</h1>
+
+    <form id="login-form" method="post" action="/login">
+        <label for="username">Username:</label><br>
+        <input type="text" id="username" name="username" class="input-field"><br>
+
+        <label for="password">Password:</label><br>
+        <input type="password" id="password" name="password" class="input-field"><br>
+
+        <input type="submit" value="Login">
+    </form>
+
+    <p>Don't have an account? <a href="/signup">Sign up here</a></p>
+    <p><a href="/leaderboard">Leaderboard</a></p>
+
+    <style>
+      .input-field.error {
+        border: 2px solid red;
+      }
+    </style>
+
+    <script>
+      const form = document.getElementById('login-form');
+      const userEl = document.getElementById('username');
+      const passEl = document.getElementById('password');
+
+      form.addEventListener('submit', function(e) {
+        // clear prior errors
+        [userEl, passEl].forEach(el => el.classList.remove('error'));
+
+        const u = userEl.value.trim();
+        const p = passEl.value;
+
+        // simple empty-field check
+        let empty = false;
+        if (!u) { userEl.classList.add('error'); empty = true; }
+        if (!p) { passEl.classList.add('error'); empty = true; }
+        if (empty) {
+          alert('Please fill in both fields.');
+          e.preventDefault();
+          return;
+        }
+
+        e.preventDefault();
+        fetch('/check_login', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-CSRFToken': '{{ csrf_token }}'
+          },
+          body: 'username=' + encodeURIComponent(u)
+               + '&password=' + encodeURIComponent(p)
+        })
+        .then(r => r.json())
+        .then(data => {
+          if (data.ok) {
+            form.submit();
+          } else {
+            userEl.classList.add('error');
+            passEl.classList.add('error');
+            alert('Invalid username or password.');
+          }
+        })
+        .catch(err => {
+          console.error(err);
+          form.submit();
+        });
+      });
+    </script>
+{% endblock %}
